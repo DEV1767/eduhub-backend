@@ -1,0 +1,111 @@
+EventHub Project Overview
+=========================
+
+Project Name: EventHub
+Version: 1.0.0
+Author: Shivam Chaudhary
+
+Project Idea
+------------
+EventHub is a backend platform for college event lifecycle management. It enables students, organizers, and administrators to register, create, schedule, team-up for, and manage events in a centralized system.
+
+Goals:
+- Simplify event creation and discovery
+- Provide role-based access for Student/Admin/Organizer
+- Support team and schedule management
+- Secure authentication and event registration
+
+Key Features
+------------
+1. Authentication & Authorization
+   - User registration and login with JWT (access + refresh tokens)
+   - Role-based access: Student, Admin, Organizer
+   - Password hashing using bcrypt
+   - Token refresh & logout
+
+2. Event Management
+   - CRUD operations on events
+   - Filter events by type, status, date
+   - Support categories, capacities, prize details
+
+3. Team Management
+   - Create teams for events
+   - Invite/add team members
+   - Manage team registration and participation
+
+4. Schedule Management
+   - Create and list event schedules
+   - Manage timeline and upcoming sessions
+
+5. User Management
+   - User profile details (name, email, college, role)
+   - View and update user data
+   - Track registered events
+
+6. Data Validation
+   - Joi-based schema validation for requests
+   - Centralized error handling middleware
+
+Tech Stack
+----------
+- Node.js + Express.js (server)
+- MongoDB + Mongoose (database)
+- JWT for auth
+- bcrypt for hashing
+- Joi for validation
+- CORS, dotenv, cookie-parser
+
+Project Structure
+-----------------
+- `app.js`: main Express app config
+- `index.js`: server bootstrapping
+- `src/controller/`: business logic for auth/event/user/teams/schedule
+- `src/routes/`: endpoint routes
+- `src/model/`: Mongoose models (user, event, registration, schedule)
+- `src/middleware/`: auth/role validate middleware
+- `src/utils/generateTokens.js`: JWT helper
+- `src/validators/joi.validate.js`: Joi validation definitions
+
+Configuration
+-------------
+Environment file (`.env`) includes:
+- PORT (default 8000)
+- NODE_ENV
+- MONGO_URL (local or Atlas)
+- JWT_ACCESS_SECRET
+- JWT_REFRESH_SECRET
+- JWT_ACCESS_EXPIRY (e.g., 15m)
+- JWT_REFRESH_EXPIRY (e.g., 7d)
+- CORS_ORIGIN
+
+Run
+---
+Development:
+- `npm install`
+- `npm run dev`
+
+Production:
+- `node index.js`
+
+API Base URL: `http://localhost:8000/api/v1`
+
+Endpoints (summary)
+-------------------
+- Auth: POST /auth/register, /auth/login, /auth/logout, /auth/refresh
+- Events: GET /events, GET /events/:id, POST /events, PUT /events/:id, DELETE /events/:id
+- Teams: GET /teams, GET /teams/:id, POST /teams, PUT /teams/:id, DELETE /teams/:id
+- Schedule: GET /schedule, POST /schedule
+- User: GET /users, GET /users/:id, PUT /users/:id (or similar as in user routes)
+
+Why this is useful
+------------------
+- Helps colleges manage events in one system
+- Reduces manual coordination for team and schedule organization
+- Secure access control ensures roles can only access allowed functions
+- Modular codebase can be extended for frontend, notifications, analytics
+
+Additional Notes
+----------------
+- There is a test connectivity endpoint: GET /test returns a health check message.
+- Use `Postman` or `Insomnia` to exercise endpoints after authenticating.
+- Documentation can be converted into README or API docs for non-dev stakeholders.
