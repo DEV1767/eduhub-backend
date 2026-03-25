@@ -5,7 +5,7 @@ import express from "express";
 import { registerUser, loginUser, logoutUser, getMe, refreshAccessToken } from "../controller/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.js";
-import { sendOTP } from "../utils/sendemail.js";
+import { sendOTPlogin } from "../utils/sendemail.js";
 import { verifyOTP } from "../utils/verify.email.js";
 
 const router = express.Router();
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/signup", registerUser);
 router.post("/login", loginUser);
 router.post("/refresh", refreshAccessToken)
-router.post("/send-otp", sendOTP)
+router.post("/send-otp", sendOTPlogin)
 router.post("/verify-otp", verifyOTP)
 
 
