@@ -65,12 +65,10 @@ userSchema.pre("save", async function () {
     this.password = await bcrypt.hash(this.password, 10);
 });
 
-
 //  Compare password
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
-
 
 //  Generate Access Token
 userSchema.methods.generateAccessToken = function () {
@@ -85,7 +83,6 @@ userSchema.methods.generateAccessToken = function () {
     );
 };
 
-
 //  Generate Refresh Token
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
@@ -98,7 +95,6 @@ userSchema.methods.generateRefreshToken = function () {
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
     );
 };
-
 
 //  Generate Temporary Token (for password reset)
 userSchema.methods.generateTemporaryToken = function () {

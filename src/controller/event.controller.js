@@ -62,14 +62,55 @@ export const Createevent = async (req, res) => {
 };
 
 
-//get_all_event
+//get_all_event(Ai-help)
 export const getevent = async (req, res) => {
     try {
-        const events = await Event.find({ collegename: req.user.collegename })
-            .sort({ createdAt: -1 });
+        const { search, type, status, startDate, endDate, page, limit } = req.query;
+
+        // Base filter - always filter by college
+        const filter = {
+            collegename: req.user.collegename
+        };
+
+        // Search by event name
+        if (search) {
+            filter.name = { $regex: search, $options: "i" };
+        }
+
+        // Filter by event type
+        if (type) {
+            filter.type = type;
+        }
+
+        // Filter by event status
+        if (status) {
+            filter.status = status;
+        }
+
+        // Filter by date range
+        if (startDate || endDate) {
+            filter.date = {};
+            if (startDate) filter.date.$gte = new Date(startDate);
+            if (endDate) filter.date.$lte = new Date(endDate);
+        }
+
+        // Pagination
+        const currentPage = parseInt(page) || 1;
+        const pageLimit = parseInt(limit) || 10;
+        const skip = (currentPage - 1) * pageLimit;
+
+        // Get total count and events
+        const totalEvents = await Event.countDocuments(filter);
+        const events = await Event.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(pageLimit);
 
         return res.status(200).json({
             success: true,
+            totalEvents,
+            totalPages: Math.ceil(totalEvents / pageLimit),
+            currentPage,
             count: events.length,
             events
         });
@@ -77,6 +118,7 @@ export const getevent = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({
+            success: false,
             message: "Internal server error"
         });
     }

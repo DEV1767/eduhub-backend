@@ -3,8 +3,9 @@
 //Authentication controller for login ,register etc
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
+import jwt from "jsonwebtoken"
 
-// ── COOKIE OPTIONS ──
+//  COOKIE OPTIONS 
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -12,7 +13,7 @@ const cookieOptions = {
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
-// ── REGISTER ──
+//  REGISTER 
 export const registerUser = async (req, res) => {
     try {
         const { firstname, lastname, email, role, collegename, password } = req.body;
@@ -70,8 +71,7 @@ export const registerUser = async (req, res) => {
     }
 };
 
-
-// ── LOGIN ──
+//  LOGIN 
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -122,8 +122,7 @@ export const loginUser = async (req, res) => {
     }
 };
 
-
-// ── LOGOUT ──
+//  LOGOUT 
 export const logoutUser = async (req, res) => {
     try {
         // Clear refresh token from DB
@@ -148,8 +147,7 @@ export const logoutUser = async (req, res) => {
     }
 };
 
-
-// ── GET CURRENT USER ──
+//  GET CURRENT USER 
 export const getMe = async (req, res) => {
     try {
         const user = await Users.findById(req.user._id);
@@ -164,3 +162,47 @@ export const getMe = async (req, res) => {
         });
     }
 };
+
+// Get refreshToken
+export const refreshAccessToken = async (req, res) => {
+    try {
+        const incomingrefreshToken = req.cookies?.refreshToken;
+        if (!incomingrefreshToken) {
+            return res.status(403).json({
+                message: "Refresh Token is missing"
+            })
+        }
+
+        const decode = jwt.verify(
+            incomingrefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        )
+        const user = await Users.findById(decode._id).select("+refreshToken")
+        if (!user || user.refreshToken !== incomingrefreshToken) {
+            return res.status(401).json({
+                message: "Invalid refresh Token"
+            })
+        }
+        const { accessToken, refreshToken } = await generateTokens(user._id);
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
+        }
+        return res.status(200)
+            .cookie("accessToken", accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
+            .json({
+                message: "Access token refreshed successfully", accessToken
+            })
+    } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                message: "Refresh token expired, please login again"
+            })
+        }
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}

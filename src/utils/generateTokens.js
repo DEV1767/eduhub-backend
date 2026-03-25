@@ -24,3 +24,4 @@ export const generateTokens = async (userId) => {
         throw new Error(`Token generation failed: ${error.message}`);
     }
 };
+

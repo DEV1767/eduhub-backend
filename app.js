@@ -24,13 +24,13 @@ app.use(cors({
 }));
 
 
-// 🔥 Test route
+//  Test route
 app.get("/test", (req, res) => {
     res.send("Hii !! welcome to event managing website and server is started");
 });
 
 
-//  Routes (ONLY ONCE per module)
+// Routes (ONLY ONCE per module)
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/teams", teamRoutes);
