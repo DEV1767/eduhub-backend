@@ -1,17 +1,29 @@
 import mongoose from "mongoose";
 
 const URL = process.env.MONGO_URL;
+let cached = global.mongoose || { conn: null, promise: null };
 
 export const connect_db = async () => {
     try {
-        console.log("MONGO URL:", process.env.MONGO_URL);
-        if (!URL) {
-            throw new Error("MONGO_URL is missing");
+        if (!URL) throw new Error("MONGO_URL is missing");
+
+        // Return existing connection if available
+        if (cached.conn) {
+            console.log("✅ Using cached DB connection");
+            return cached.conn;
         }
 
-        await mongoose.connect(URL);   // ✅ IMPORTANT
+        if (!cached.promise) {
+            cached.promise = mongoose.connect(URL, {
+                serverSelectionTimeoutMS: 10000,
+                bufferCommands: false, // ← disables the buffering that caused your error
+            });
+        }
 
-        console.log("✅ Database is connected !!");
+        cached.conn = await cached.promise;
+        global.mongoose = cached;
+        console.log("✅ Database connected!");
+        return cached.conn;
 
     } catch (error) {
         console.log("❌ DB connection failed:", error);
