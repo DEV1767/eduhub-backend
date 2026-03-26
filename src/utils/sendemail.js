@@ -6,7 +6,7 @@ import { connect_db } from "../model/db.js";
 const generateSecureOTP = () => crypto.randomInt(100000, 999999).toString();
 
 //  SEND OTP FOR LOGIN
-export const sendOTPlogin = async (req, res) => {
+/*export const sendOTPlogin = async (req, res) => {
     try {
         await connect_db()
         const { email } = req.body;
@@ -15,7 +15,7 @@ export const sendOTPlogin = async (req, res) => {
         await OTP.findOneAndUpdate(
             { email },
             { otp, expiresAt: Date.now() + 5 * 60 * 1000 },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
 
         await transporter.sendMail({
@@ -48,7 +48,7 @@ export const sendOTPlogin = async (req, res) => {
         console.error(error);
         res.status(500).json({ success: false, message: "Internal server issue" });
     }
-};
+};*/
 
 // SEND OTP FOR SIGNUP 
 export const sendOTPsignup = async (req, res) => {
@@ -60,7 +60,7 @@ export const sendOTPsignup = async (req, res) => {
         await OTP.findOneAndUpdate(
             { email },
             { otp, expiresAt: Date.now() + 5 * 60 * 1000 },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
 
         await transporter.sendMail({
