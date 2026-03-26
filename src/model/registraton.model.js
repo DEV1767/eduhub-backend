@@ -22,7 +22,7 @@ const Registrationschema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        
     },
     event: {
         type: mongoose.Schema.Types.ObjectId,

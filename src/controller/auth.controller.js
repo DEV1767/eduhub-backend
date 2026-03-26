@@ -5,6 +5,7 @@ import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken"
 
+
 //  COOKIE OPTIONS 
 const cookieOptions = {
     httpOnly: true,
@@ -41,6 +42,7 @@ export const registerUser = async (req, res) => {
             role: role || "Student",
             password
         });
+
 
         // Auto login after register — generate tokens and set cookies
         const { accessToken, refreshToken } = await generateTokens(newUser._id);

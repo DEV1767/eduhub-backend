@@ -1,12 +1,10 @@
 import app from "./app.js";
-import { connect_db } from "./src/model/db.js"
+import { connect_db } from "./src/model/db.js";
 
-const PORT = 8000 || process.env.PORT;
+const PORT = process.env.PORT || 8000;
 
-
-
-app.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${PORT}`);
+connect_db().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
-
-connect_db()

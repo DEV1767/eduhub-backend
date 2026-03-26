@@ -10,6 +10,7 @@ import { authorized } from "../middleware/role.middleware.js"
 
 
 
+
 const router = express.Router()
 
 router.post("/register", authMiddleware, validate(registerevent), registerteam)

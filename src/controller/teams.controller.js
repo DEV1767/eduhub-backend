@@ -4,6 +4,7 @@
 import mongoose from "mongoose";
 import Teams from "../model/registraton.model.js";
 import Event from "../model/event.model.js";
+import { sendEventConfirmation } from "../utils/sendemail.js";
 
 // ── REGISTER TEAM ──
 export const registerteam = async (req, res) => {
@@ -47,6 +48,13 @@ export const registerteam = async (req, res) => {
             email,
             event: _eventId,
             registeredBy: req.user._id
+        });
+
+        await sendEventConfirmation({
+            email,
+            teamname: _teamname,
+            leadname: _leadname,
+            eventName: event.name
         });
 
         // Increment teams count on event
