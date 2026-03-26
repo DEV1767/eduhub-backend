@@ -18,14 +18,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+const cors = require("cors");
+
+const allowedOrigins = [
+    "http://localhost:5500",
+    "https://eduhubevent.netlify.app"
+];
+
 app.use(cors({
-    origin: [
-        "http://localhost:5500",
-        "https://eduhubevent.netlify.app/"
-    ],
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS not allowed"));
+        }
+    },
     credentials: true
 }));
 
+app.options("*", cors());
 
 //  Test route
 app.get("/test", (req, res) => {
@@ -38,7 +49,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/teams", teamRoutes);
 app.use("/api/v1/schedule", scheduleRoutes)
-app.use("/api/v1/user",userRoutes)
+app.use("/api/v1/user", userRoutes)
 
 
 
