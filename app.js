@@ -18,8 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const cors = require("cors");
-
 const allowedOrigins = [
     "http://localhost:5500",
     "https://eduhubevent.netlify.app"
