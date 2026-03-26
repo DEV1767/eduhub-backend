@@ -1,6 +1,5 @@
 
 //student  event (Teams detail) registration controller 
-
 import mongoose from "mongoose";
 import Teams from "../model/registraton.model.js";
 import Event from "../model/event.model.js";

@@ -9,10 +9,9 @@ import jwt from "jsonwebtoken"
 //  COOKIE OPTIONS 
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-};
+    secure: true,
+    sameSite: "None"  
+}
 
 //  REGISTER 
 export const registerUser = async (req, res) => {
@@ -204,7 +203,7 @@ export const refreshAccessToken = async (req, res) => {
             })
         }
         return res.status(500).json({
-            message:"Internal server error"
+            message: "Internal server error"
         })
     }
 }
