@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         "http://localhost:5500",
-        "https://eduhub-backend-pj8h.onrender.com"
+        "https://eduhubevent.netlify.app/"
     ],
     credentials: true
 }));
