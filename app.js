@@ -8,16 +8,12 @@ import eventRoutes from "./src/routes/event.route.js";
 import teamRoutes from "./src/routes/teams.routes.js"
 import scheduleRoutes from "./src/routes/schedule.route.js"
 import userRoutes from "./src/routes/user.routes.js"
+
 dotenv.config();
 
 const app = express();
 
-
-//  Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
+// ✅ CORS FIRST
 const allowedOrigins = [
     "http://localhost:5500",
     "https://eduhubevent.netlify.app"
@@ -34,23 +30,21 @@ app.use(cors({
     credentials: true
 }));
 
-app.options("*", cors());
+// ✅ Then other middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-//  Test route
+// Test route
 app.get("/test", (req, res) => {
     res.send("Hii !! welcome to event managing website and server is started");
 });
 
-
-// Routes (ONLY ONCE per module)
+// Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/teams", teamRoutes);
-app.use("/api/v1/schedule", scheduleRoutes)
-app.use("/api/v1/user", userRoutes)
-
-
-
-
+app.use("/api/v1/schedule", scheduleRoutes);
+app.use("/api/v1/user", userRoutes);
 
 export default app;
