@@ -5,7 +5,7 @@ import express from "express";
 import { registerUser, loginUser, logoutUser, getMe, refreshAccessToken } from "../controller/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.js";
-import { sendOTPlogin, sendOTPsignup } from "../utils/sendemail.js";
+import { sendOTPsignup } from "../utils/sendemail.js";
 import { verifyOTP } from "../utils/verify.email.js";
 
 const router = express.Router();
