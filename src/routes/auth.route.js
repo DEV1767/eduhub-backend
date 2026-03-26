@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/signup", registerUser);
 router.post("/login", loginUser);
 router.post("/refresh", refreshAccessToken)
-router.post("/send-otp/login", sendOTPlogin)
+//router.post("/send-otp/login", sendOTPlogin)
 router.post("/send-otp/signup", sendOTPsignup)
 router.post("/verify-otp", verifyOTP)
 

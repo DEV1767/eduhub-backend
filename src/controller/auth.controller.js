@@ -4,6 +4,7 @@
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken"
+import { connect_db } from "../model/db.js";
 
 
 //  COOKIE OPTIONS 
@@ -75,6 +76,7 @@ export const registerUser = async (req, res) => {
 //  LOGIN 
 export const loginUser = async (req, res) => {
     try {
+        await connect_db()
         const { email, password } = req.body;
 
         if (!email || !password) {
