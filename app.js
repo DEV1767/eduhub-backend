@@ -19,7 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-    origin: "http://localhost:5500",
+    origin: [
+        "http://localhost:5500",
+        "https://eduhub-backend-pj8h.onrender.com"
+    ],
     credentials: true
 }));
 
