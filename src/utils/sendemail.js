@@ -1,13 +1,14 @@
 import OTP from "../model/emailotp.model.js";
 import transporter from "../config/email.js";
 import crypto from 'crypto';
-
+import { connect_db } from "../model/db.js";
 
 const generateSecureOTP = () => crypto.randomInt(100000, 999999).toString();
 
 //  SEND OTP FOR LOGIN
 export const sendOTPlogin = async (req, res) => {
     try {
+        await connect_db()
         const { email } = req.body;
         const otp = generateSecureOTP();
         console.log(otp)
@@ -52,6 +53,7 @@ export const sendOTPlogin = async (req, res) => {
 // SEND OTP FOR SIGNUP 
 export const sendOTPsignup = async (req, res) => {
     try {
+        await connect_db()
         const { email } = req.body;
         const otp = generateSecureOTP();
         console.log(otp)
@@ -105,6 +107,7 @@ export const sendEventConfirmation = async ({
     eventName
 }) => {
     try {
+        await connect_db()
         console.log("Email received:", email);
         console.log("Email function triggered");
 
