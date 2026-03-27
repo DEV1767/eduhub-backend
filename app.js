@@ -15,7 +15,7 @@ const app = express();
 
 // ✅ CORS FIRST
 const allowedOrigins = [
-    "https://eduhub-eta-coral.vercel.app/"
+    "https://eduhub-eta-coral.vercel.app"
 ];
 
 
