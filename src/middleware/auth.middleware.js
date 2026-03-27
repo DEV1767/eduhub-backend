@@ -1,4 +1,3 @@
-
 //Authentication middleware for login ,check and verify jwt cookies
 import jwt from "jsonwebtoken";
 import Users from "../model/user.model.js";

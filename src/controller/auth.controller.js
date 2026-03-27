@@ -1,10 +1,9 @@
-
-
 // Authentication controller for login, register etc
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
+
 
 //  FIXED COOKIE OPTIONS - Added maxAge and path
 const cookieOptions = {
@@ -190,16 +189,15 @@ export const refreshAccessToken = async (req, res) => {
             })
         }
         const { accessToken, refreshToken } = await generateTokens(user._id);
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
-        }
+
+        // ✅ Use the shared cookieOptions (same sameSite, secure, maxAge as login)
         return res.status(200)
             .cookie("accessToken", accessToken, cookieOptions)
             .cookie("refreshToken", refreshToken, cookieOptions)
             .json({
-                message: "Access token refreshed successfully", accessToken
+                success: true,
+                message: "Access token refreshed successfully",
+                accessToken
             })
     } catch (error) {
         if (error.name === "TokenExpiredError") {
