@@ -1,22 +1,25 @@
 
 
-//Authentication controller for login ,register etc
+// Authentication controller for login, register etc
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
-
-//  COOKIE OPTIONS 
+//  FIXED COOKIE OPTIONS - Added maxAge and path
 const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "None"  
-}
+    sameSite: "None",
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
+    path: '/'
+};
 
-//  REGISTER 
+// REGISTER 
 export const registerUser = async (req, res) => {
     try {
+        await connect_db(); // ✅ Added connection here too
+
         const { firstname, lastname, email, role, collegename, password } = req.body;
 
         if (!firstname || !email || !collegename || !password) {
@@ -42,7 +45,6 @@ export const registerUser = async (req, res) => {
             role: role || "Student",
             password
         });
-
 
         // Auto login after register — generate tokens and set cookies
         const { accessToken, refreshToken } = await generateTokens(newUser._id);
@@ -73,10 +75,10 @@ export const registerUser = async (req, res) => {
     }
 };
 
-//  LOGIN 
+// LOGIN 
 export const loginUser = async (req, res) => {
     try {
-        await connect_db()
+        await connect_db();
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -124,6 +126,7 @@ export const loginUser = async (req, res) => {
         });
     }
 };
+
 
 //  LOGOUT 
 export const logoutUser = async (req, res) => {
