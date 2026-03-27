@@ -15,8 +15,7 @@ const app = express();
 
 // ✅ CORS FIRST
 const allowedOrigins = [
-    "http://localhost:5500",
-    "https://eduhubevent.netlify.app"
+    "https://eduhub-eta-coral.vercel.app/"
 ];
 
 app.use(cors({
