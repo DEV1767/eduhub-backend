@@ -18,6 +18,13 @@ const allowedOrigins = [
     "https://eduhub-eta-coral.vercel.app/"
 ];
 
+
+app.use((req, res, next) => {
+    console.log("INCOMING ORIGIN:", req.headers.origin);
+    next();
+});
+
+// put this BEFORE your cors() middleware
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
