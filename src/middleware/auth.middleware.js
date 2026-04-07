@@ -1,6 +1,7 @@
 //Authentication middleware for login ,check and verify jwt cookies
 import jwt from "jsonwebtoken";
 import Users from "../model/user.model.js";
+import { connect_db } from "../model/db.js";
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -44,6 +45,7 @@ export const authMiddleware = async (req, res, next) => {
 
         const decoded = jwt.verify(token, accessTokenSecret);
 
+        await connect_db();
         const user = await Users.findById(decoded._id).select("-password -refreshToken");
 
         console.log("Auth user lookup:", {
@@ -78,9 +80,9 @@ export const authMiddleware = async (req, res, next) => {
                 message: "Invalid token — please login again"
             });
         }
-        return res.status(401).json({
+        return res.status(500).json({
             success: false,
-            message: "Unauthorized"
+            message: "Internal server error"
         });
     }
 };
