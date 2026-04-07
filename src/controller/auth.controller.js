@@ -4,13 +4,15 @@ import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
+const shouldUsePartitionedCookies = process.env.COOKIE_PARTITIONED === "true";
 
 // Shared auth cookie options for cross-site frontend + API deployments.
 const baseCookieOptions = {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    path: '/'
+    path: '/',
+    ...(shouldUsePartitionedCookies ? { partitioned: true } : {})
 };
 
 const accessCookieOptions = {
