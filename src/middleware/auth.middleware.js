@@ -26,9 +26,30 @@ export const authMiddleware = async (req, res, next) => {
             });
         }
 
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+        if (!accessTokenSecret) {
+            console.error("ACCESS_TOKEN_SECRET is missing in environment");
+            return res.status(500).json({
+                success: false,
+                message: "Server auth configuration error"
+            });
+        }
+
+        const unverifiedPayload = jwt.decode(token);
+        console.log("Auth token payload:", {
+            userId: unverifiedPayload?._id,
+            exp: unverifiedPayload?.exp,
+            now: Math.floor(Date.now() / 1000)
+        });
+
+        const decoded = jwt.verify(token, accessTokenSecret);
 
         const user = await Users.findById(decoded._id).select("-password -refreshToken");
+
+        console.log("Auth user lookup:", {
+            decodedUserId: decoded?._id,
+            userFound: Boolean(user)
+        });
 
         if (!user) {
             return res.status(401).json({
@@ -41,6 +62,10 @@ export const authMiddleware = async (req, res, next) => {
         next();
 
     } catch (error) {
+        console.error("Auth middleware error:", {
+            name: error.name,
+            message: error.message
+        });
         if (error.name === "TokenExpiredError") {
             return res.status(401).json({
                 success: false,
