@@ -5,13 +5,34 @@ import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
 
-//  FIXED COOKIE OPTIONS - Added maxAge and path
-const cookieOptions = {
+// Shared auth cookie options for cross-site frontend + API deployments.
+const baseCookieOptions = {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
     path: '/'
+};
+
+const accessCookieOptions = {
+    ...baseCookieOptions,
+    maxAge: 15 * 60 * 1000
+};
+
+const refreshCookieOptions = {
+    ...baseCookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+};
+
+const setAuthCookies = (res, accessToken, refreshToken) => {
+    return res
+        .cookie("accessToken", accessToken, accessCookieOptions)
+        .cookie("refreshToken", refreshToken, refreshCookieOptions);
+};
+
+const clearAuthCookies = (res) => {
+    return res
+        .clearCookie("accessToken", baseCookieOptions)
+        .clearCookie("refreshToken", baseCookieOptions);
 };
 
 // REGISTER 
@@ -48,9 +69,7 @@ export const registerUser = async (req, res) => {
         // Auto login after register — generate tokens and set cookies
         const { accessToken, refreshToken } = await generateTokens(newUser._id);
 
-        return res.status(201)
-            .cookie("accessToken", accessToken, cookieOptions)
-            .cookie("refreshToken", refreshToken, cookieOptions)
+        return setAuthCookies(res.status(201), accessToken, refreshToken)
             .json({
                 success: true,
                 message: "Registered successfully",
@@ -107,9 +126,7 @@ export const loginUser = async (req, res) => {
 
         const loggedInUser = await Users.findById(user._id).select("-password -refreshToken");
 
-        return res.status(200)
-            .cookie("accessToken", accessToken, cookieOptions)
-            .cookie("refreshToken", refreshToken, cookieOptions)
+        return setAuthCookies(res.status(200), accessToken, refreshToken)
             .json({
                 success: true,
                 message: "Login successful",
@@ -135,9 +152,7 @@ export const logoutUser = async (req, res) => {
             $unset: { refreshToken: 1 }
         });
 
-        return res.status(200)
-            .clearCookie("accessToken", cookieOptions)
-            .clearCookie("refreshToken", cookieOptions)
+        return clearAuthCookies(res.status(200))
             .json({
                 success: true,
                 message: "Logged out successfully"
@@ -190,10 +205,7 @@ export const refreshAccessToken = async (req, res) => {
         }
         const { accessToken, refreshToken } = await generateTokens(user._id);
 
-        // ✅ Use the shared cookieOptions (same sameSite, secure, maxAge as login)
-        return res.status(200)
-            .cookie("accessToken", accessToken, cookieOptions)
-            .cookie("refreshToken", refreshToken, cookieOptions)
+        return setAuthCookies(res.status(200), accessToken, refreshToken)
             .json({
                 success: true,
                 message: "Access token refreshed successfully",

@@ -13,10 +13,15 @@ dotenv.config();
 
 const app = express();
 
+// Needed on hosted platforms (Render/Railway/Vercel) so secure cookies work reliably.
+app.set("trust proxy", 1);
+
 // ✅ CORS FIRST
-const allowedOrigins = [
-    "https://eduhub-eta-coral.vercel.app"
-];
+const defaultOrigins = ["https://eduhub-eta-coral.vercel.app"];
+const allowedOrigins = (process.env.CORS_ORIGINS || defaultOrigins.join(","))
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
 
 
 app.use((req, res, next) => {
@@ -27,12 +32,15 @@ app.use((req, res, next) => {
 // put this BEFORE your cors() middleware
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        const normalizedOrigin = origin?.replace(/\/$/, "");
+        if (!origin || allowedOrigins.includes(normalizedOrigin)) {
             callback(null, true);
         } else {
             callback(new Error("CORS not allowed"));
         }
     },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
 

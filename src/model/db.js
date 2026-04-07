@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const URL = process.env.MONGO_URL;
 let cached = global.mongoose || { conn: null, promise: null };
 
 export const connect_db = async () => {
+    const URL = process.env.MONGO_URL;
     if (!URL) throw new Error("MONGO_URL is missing");
 
     if (cached.conn) return cached.conn; // reuse existing connection
