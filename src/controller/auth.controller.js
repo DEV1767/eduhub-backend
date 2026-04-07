@@ -4,10 +4,14 @@ import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isHostedDeployment =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.VERCEL === "true";
+
 const cookieSecure = process.env.COOKIE_SECURE
     ? process.env.COOKIE_SECURE === "true"
-    : isProduction;
+    : isHostedDeployment;
 
 const requestedSameSite = (process.env.COOKIE_SAME_SITE || (cookieSecure ? "none" : "lax")).toLowerCase();
 const allowedSameSiteValues = ["lax", "strict", "none"];
