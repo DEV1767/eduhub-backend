@@ -4,6 +4,12 @@ import Users from "../model/user.model.js";
 
 export const authMiddleware = async (req, res, next) => {
     try {
+        console.log("Auth middleware:", {
+            origin: req.headers.origin,
+            hasCookieHeader: Boolean(req.headers.cookie),
+            hasAccessTokenCookie: Boolean(req.cookies?.accessToken),
+            hasBearerHeader: Boolean(req.headers.authorization?.startsWith("Bearer "))
+        });
        
         let token;
 

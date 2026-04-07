@@ -42,6 +42,13 @@ const refreshCookieOptions = {
 };
 
 const setAuthCookies = (res, accessToken, refreshToken) => {
+    console.log("Setting auth cookies:", {
+        secure: accessCookieOptions.secure,
+        sameSite: accessCookieOptions.sameSite,
+        partitioned: Boolean(baseCookieOptions.partitioned),
+        accessMaxAge: accessCookieOptions.maxAge,
+        refreshMaxAge: refreshCookieOptions.maxAge
+    });
     return res
         .cookie("accessToken", accessToken, accessCookieOptions)
         .cookie("refreshToken", refreshToken, refreshCookieOptions);
@@ -57,6 +64,11 @@ const clearAuthCookies = (res) => {
 export const registerUser = async (req, res) => {
     try {
         await connect_db(); // ✅ Added connection here too
+        console.log("Register request:", {
+            origin: req.headers.origin,
+            hasCookies: Boolean(req.headers.cookie),
+            cookieHeaderLength: req.headers.cookie?.length || 0
+        });
 
         const { firstname, lastname, email, role, collegename, password } = req.body;
 
@@ -115,6 +127,11 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
         await connect_db();
+        console.log("Login request:", {
+            origin: req.headers.origin,
+            hasCookies: Boolean(req.headers.cookie),
+            cookieHeaderLength: req.headers.cookie?.length || 0
+        });
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -205,6 +222,11 @@ export const getMe = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
     try {
         const incomingrefreshToken = req.cookies?.refreshToken;
+        console.log("Refresh request:", {
+            origin: req.headers.origin,
+            hasCookieHeader: Boolean(req.headers.cookie),
+            hasRefreshTokenCookie: Boolean(incomingrefreshToken)
+        });
         if (!incomingrefreshToken) {
             return res.status(403).json({
                 message: "Refresh Token is missing"

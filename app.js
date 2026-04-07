@@ -55,6 +55,13 @@ app.use(cors({
         const normalizedOrigin = origin?.replace(/\/$/, "");
         const isNullOrigin = origin === "null";
         const isVercelPreviewOrigin = normalizedOrigin ? /^https:\/\/[^/]+\.vercel\.app$/.test(normalizedOrigin) : false;
+        console.log("CORS check:", {
+            origin,
+            normalizedOrigin,
+            isNullOrigin,
+            isVercelPreviewOrigin,
+            allowed: !origin || allowedOrigins.includes(normalizedOrigin) || (vercelPreviewOrigins.length > 0 && isVercelPreviewOrigin) || (allowNullOrigin && isNullOrigin)
+        });
         if (!origin || allowedOrigins.includes(normalizedOrigin) || (vercelPreviewOrigins.length > 0 && isVercelPreviewOrigin) || (allowNullOrigin && isNullOrigin)) {
             callback(null, true);
         } else {
