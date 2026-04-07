@@ -4,13 +4,25 @@ import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
-const shouldUsePartitionedCookies = process.env.COOKIE_PARTITIONED === "true";
+const isProduction = process.env.NODE_ENV === "production";
+const cookieSecure = process.env.COOKIE_SECURE
+    ? process.env.COOKIE_SECURE === "true"
+    : isProduction;
+
+const requestedSameSite = (process.env.COOKIE_SAME_SITE || (cookieSecure ? "none" : "lax")).toLowerCase();
+const allowedSameSiteValues = ["lax", "strict", "none"];
+const safeSameSite = allowedSameSiteValues.includes(requestedSameSite) ? requestedSameSite : "lax";
+
+// sameSite=none is only valid with secure=true in modern browsers.
+const cookieSameSite = safeSameSite === "none" && !cookieSecure ? "lax" : safeSameSite;
+const shouldUsePartitionedCookies =
+    process.env.COOKIE_PARTITIONED === "true" && cookieSecure && cookieSameSite === "none";
 
 // Shared auth cookie options for cross-site frontend + API deployments.
 const baseCookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
+    secure: cookieSecure,
+    sameSite: cookieSameSite,
     path: '/',
     ...(shouldUsePartitionedCookies ? { partitioned: true } : {})
 };

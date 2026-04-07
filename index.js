@@ -1,3 +1,4 @@
+import "dotenv/config";
 import app from "./app.js";
 import { connect_db } from "./src/model/db.js";
 
