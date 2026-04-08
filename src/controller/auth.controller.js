@@ -1,4 +1,4 @@
-// Authentication controller for login, register etc
+
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
@@ -17,12 +17,12 @@ const requestedSameSite = (process.env.COOKIE_SAME_SITE || (cookieSecure ? "none
 const allowedSameSiteValues = ["lax", "strict", "none"];
 const safeSameSite = allowedSameSiteValues.includes(requestedSameSite) ? requestedSameSite : "lax";
 
-// sameSite=none is only valid with secure=true in modern browsers.
+
 const cookieSameSite = safeSameSite === "none" && !cookieSecure ? "lax" : safeSameSite;
 const shouldUsePartitionedCookies =
     process.env.COOKIE_PARTITIONED === "true" && cookieSecure && cookieSameSite === "none";
 
-// Shared auth cookie options for cross-site frontend + API deployments.
+
 const baseCookieOptions = {
     httpOnly: true,
     secure: cookieSecure,
@@ -33,7 +33,7 @@ const baseCookieOptions = {
 
 const accessCookieOptions = {
     ...baseCookieOptions,
-    maxAge: 15 * 60 * 1000
+    maxAge: 24 * 60 * 60 * 1000
 };
 
 const refreshCookieOptions = {
@@ -63,7 +63,7 @@ const clearAuthCookies = (res) => {
 // REGISTER 
 export const registerUser = async (req, res) => {
     try {
-        await connect_db(); // ✅ Added connection here too
+        await connect_db(); 
         console.log("Register request:", {
             origin: req.headers.origin,
             hasCookies: Boolean(req.headers.cookie),
@@ -103,6 +103,7 @@ export const registerUser = async (req, res) => {
             .json({
                 success: true,
                 message: "Registered successfully",
+                accessToken,
                 user: {
                     _id: newUser._id,
                     firstname: newUser.firstname,
@@ -165,6 +166,7 @@ export const loginUser = async (req, res) => {
             .json({
                 success: true,
                 message: "Login successful",
+                accessToken,
                 user: loggedInUser
             });
 

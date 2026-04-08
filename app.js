@@ -15,18 +15,12 @@ const isHostedDeployment =
     process.env.VERCEL === "1" ||
     process.env.VERCEL === "true";
 
-// Needed on hosted platforms (Render/Railway/Vercel) so secure cookies work reliably.
+
 app.set("trust proxy", 1);
 
-// ✅ CORS FIRST
+
 const defaultOrigins = [
-    "https://eduhub-eta-coral.vercel.app",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500"
+    "https://eduhub-eta-coral.vercel.app"
 ];
 const explicitOrigins = (process.env.CORS_ORIGINS || "")
     .split(",")
@@ -43,13 +37,6 @@ const allowedOrigins = Array.from(new Set([
 ]));
 const allowNullOrigin = !isHostedDeployment || process.env.ALLOW_NULL_ORIGIN === "true";
 
-
-app.use((req, res, next) => {
-    console.log("INCOMING ORIGIN:", req.headers.origin);
-    next();
-});
-
-// put this BEFORE your cors() middleware
 app.use(cors({
     origin: function (origin, callback) {
         const normalizedOrigin = origin?.replace(/\/$/, "");
@@ -73,12 +60,12 @@ app.use(cors({
     credentials: true
 }));
 
-// ✅ Then other middlewares
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Test route
+
 app.get("/test", (req, res) => {
     res.send("Hii !! welcome to event managing website and server is started");
 });
