@@ -1,5 +1,4 @@
 
-
 //verify sended email
 import OTP from "../model/emailotp.model.js"
 export const verifyOTP = async (req, res) => {

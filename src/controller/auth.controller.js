@@ -160,7 +160,7 @@ export const loginUser = async (req, res) => {
 
         const { accessToken, refreshToken } = await generateTokens(user._id);
 
-        const loggedInUser = await Users.findById(user._id).select("-password -refreshToken");
+        const loggedInUser = await Users.findById(user._id).select("-password -refreshToken -createdAt -role -updatedAt -_id -collegename -email ");
 
         return setAuthCookies(res.status(200), accessToken, refreshToken)
             .json({

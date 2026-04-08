@@ -11,12 +11,12 @@ export const connect_db = async () => {
     if (!cached.promise) {
         cached.promise = mongoose.connect(URL, {
             serverSelectionTimeoutMS: 10000,
-            bufferCommands: false, // ← this prevents the buffering timeout error
+            bufferCommands: false,
         });
     }
 
     cached.conn = await cached.promise;
     global.mongoose = cached;
-    console.log("✅ Database connected!");
+    console.log(" Database connected!");
     return cached.conn;
 };

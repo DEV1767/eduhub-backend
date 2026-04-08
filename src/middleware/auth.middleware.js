@@ -5,13 +5,6 @@ import { connect_db } from "../model/db.js";
 
 export const authMiddleware = async (req, res, next) => {
     try {
-        console.log("Auth middleware:", {
-            origin: req.headers.origin,
-            hasCookieHeader: Boolean(req.headers.cookie),
-            hasAccessTokenCookie: Boolean(req.cookies?.accessToken),
-            hasBearerHeader: Boolean(req.headers.authorization?.startsWith("Bearer "))
-        });
-       
         let token;
 
         if (req.cookies?.accessToken) {
