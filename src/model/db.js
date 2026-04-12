@@ -6,7 +6,7 @@ export const connect_db = async () => {
     const URL = process.env.MONGO_URL;
     if (!URL) throw new Error("MONGO_URL is missing");
 
-    if (cached.conn) return cached.conn; // reuse existing connection
+    if (cached.conn) return cached.conn; 
 
     if (!cached.promise) {
         cached.promise = mongoose.connect(URL, {

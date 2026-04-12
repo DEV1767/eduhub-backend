@@ -19,7 +19,6 @@ export const Createevent = async (req, res) => {
             description,
         } = req.body;
 
-        //  Check required fields only
         if (!name || !type || !date) {
             return res.status(400).json({
                 message: "Name, type and date are required"

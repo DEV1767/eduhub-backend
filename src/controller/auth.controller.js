@@ -1,74 +1,16 @@
 
 import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
+import { setAuthCookies, clearAuthCookies } from "../utils/setAuthCookies.js";
 import jwt from "jsonwebtoken";
 import { connect_db } from "../model/db.js";
 
-const isHostedDeployment =
-    process.env.NODE_ENV === "production" ||
-    process.env.VERCEL === "1" ||
-    process.env.VERCEL === "true";
-
-const cookieSecure = process.env.COOKIE_SECURE
-    ? process.env.COOKIE_SECURE === "true"
-    : isHostedDeployment;
-
-const requestedSameSite = (process.env.COOKIE_SAME_SITE || (cookieSecure ? "none" : "lax")).toLowerCase();
-const allowedSameSiteValues = ["lax", "strict", "none"];
-const safeSameSite = allowedSameSiteValues.includes(requestedSameSite) ? requestedSameSite : "lax";
 
 
-const cookieSameSite = safeSameSite === "none" && !cookieSecure ? "lax" : safeSameSite;
-const shouldUsePartitionedCookies =
-    process.env.COOKIE_PARTITIONED === "true" && cookieSecure && cookieSameSite === "none";
-
-
-const baseCookieOptions = {
-    httpOnly: true,
-    secure: cookieSecure,
-    sameSite: cookieSameSite,
-    path: '/',
-    ...(shouldUsePartitionedCookies ? { partitioned: true } : {})
-};
-
-const accessCookieOptions = {
-    ...baseCookieOptions,
-    maxAge: 24 * 60 * 60 * 1000
-};
-
-const refreshCookieOptions = {
-    ...baseCookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000
-};
-
-const setAuthCookies = (res, accessToken, refreshToken) => {
-    console.log("Setting auth cookies:", {
-        secure: accessCookieOptions.secure,
-        sameSite: accessCookieOptions.sameSite,
-        partitioned: Boolean(baseCookieOptions.partitioned),
-        accessMaxAge: accessCookieOptions.maxAge,
-        refreshMaxAge: refreshCookieOptions.maxAge
-    });
-    return res
-        .cookie("accessToken", accessToken, accessCookieOptions)
-        .cookie("refreshToken", refreshToken, refreshCookieOptions);
-};
-
-const clearAuthCookies = (res) => {
-    return res
-        .clearCookie("accessToken", baseCookieOptions)
-        .clearCookie("refreshToken", baseCookieOptions);
-};
-
-// REGISTER 
+// REGISTER  (adding joi remaining)
 export const registerUser = async (req, res) => {
     try {
         await connect_db(); 
-        console.log("Register request:", {
-            origin: req.headers.origin,
-            hasCookies: Boolean(req.headers.cookie),
-            cookieHeaderLength: req.headers.cookie?.length || 0
-        });
 
         const { firstname, lastname, email, role, collegename, password } = req.body;
 
@@ -127,12 +69,7 @@ export const registerUser = async (req, res) => {
 // LOGIN 
 export const loginUser = async (req, res) => {
     try {
-        await connect_db();
-        console.log("Login request:", {
-            origin: req.headers.origin,
-            hasCookies: Boolean(req.headers.cookie),
-            cookieHeaderLength: req.headers.cookie?.length || 0
-        });
+       
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -184,7 +121,7 @@ export const loginUser = async (req, res) => {
 //  LOGOUT 
 export const logoutUser = async (req, res) => {
     try {
-        // Clear refresh token from DB
+       
         await Users.findByIdAndUpdate(req.user._id, {
             $unset: { refreshToken: 1 }
         });
@@ -224,11 +161,6 @@ export const getMe = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
     try {
         const incomingrefreshToken = req.cookies?.refreshToken;
-        console.log("Refresh request:", {
-            origin: req.headers.origin,
-            hasCookieHeader: Boolean(req.headers.cookie),
-            hasRefreshTokenCookie: Boolean(incomingrefreshToken)
-        });
         if (!incomingrefreshToken) {
             return res.status(403).json({
                 message: "Refresh Token is missing"
