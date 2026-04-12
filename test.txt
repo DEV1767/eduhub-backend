@@ -1,0 +1,9 @@
+//Student
+{
+    "firstname":"Shivam",
+    "lastname":"chy",
+    "email":"shivamchy076@gmail.com",
+    "password":"shiv@9934",
+    "role":"Student",
+    "collegename":"JNNCE"
+}

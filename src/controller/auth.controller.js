@@ -3,23 +3,22 @@ import Users from "../model/user.model.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import { setAuthCookies, clearAuthCookies } from "../utils/setAuthCookies.js";
 import jwt from "jsonwebtoken";
-import { connect_db } from "../model/db.js";
+import { registeruserSchema, loginuserSchema } from "../validators/joi.validate.js";
+import { validate } from "../middleware/validate.js"
 
 
-
-// REGISTER  (adding joi remaining)
+// REGISTER  
 export const registerUser = async (req, res) => {
     try {
-        await connect_db(); 
 
-        const { firstname, lastname, email, role, collegename, password } = req.body;
-
-        if (!firstname || !email || !collegename || !password) {
+        const { error, value } = registeruserSchema.validate(req.body)
+        if (error) {
             return res.status(400).json({
                 success: false,
-                message: "Required fields missing"
-            });
+                message: error.details[0].message
+            })
         }
+        const { firstname, lastname, email, role, collegename, password } = value;
 
         const existingUser = await Users.findOne({ email });
         if (existingUser) {
@@ -69,15 +68,18 @@ export const registerUser = async (req, res) => {
 // LOGIN 
 export const loginUser = async (req, res) => {
     try {
-       
-        const { email, password } = req.body;
 
-        if (!email || !password) {
+        const { error, value } = loginuserSchema.validate(req.body);
+
+        if (error) {
             return res.status(400).json({
                 success: false,
-                message: "Email and password are required"
+                message: error.details[0].message
             });
         }
+
+        
+        const { email, password } = value;
 
         const user = await Users.findOne({ email }).select("+password");
         if (!user) {
@@ -97,7 +99,8 @@ export const loginUser = async (req, res) => {
 
         const { accessToken, refreshToken } = await generateTokens(user._id);
 
-        const loggedInUser = await Users.findById(user._id).select("-password -refreshToken");
+        const loggedInUser = await Users.findById(user._id)
+            .select("-password -refreshToken");
 
         return setAuthCookies(res.status(200), accessToken, refreshToken)
             .json({
@@ -121,7 +124,7 @@ export const loginUser = async (req, res) => {
 //  LOGOUT 
 export const logoutUser = async (req, res) => {
     try {
-       
+
         await Users.findByIdAndUpdate(req.user._id, {
             $unset: { refreshToken: 1 }
         });

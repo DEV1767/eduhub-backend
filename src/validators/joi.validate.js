@@ -3,6 +3,21 @@
 
 import joi from "joi"
 
+
+export const registeruserSchema = joi.object({
+    firstname: joi.string().min(5).required(),
+    lastname: joi.string(),
+    email: joi.string().email().required(),
+    role: joi.string().valid("Student", "Faculty", "Organizer").default("Student"),
+    collegename: joi.string().min(5).required(),
+    password: joi.string().min(6).pattern(/[a-zA-Z0-9]/).required()
+});
+
+export const loginuserSchema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().required()
+});
+
 export const createeventschema = joi.object({
     name: joi.string().min(3).required(),
     type: joi.string().valid("Hackathon", "Quiz", "Cultural", "Techtalk", "Sports").required(),
