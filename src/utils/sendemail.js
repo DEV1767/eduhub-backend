@@ -2,6 +2,7 @@ import OTP from "../model/emailotp.model.js";
 import transporter from "../config/email.js";
 import crypto from 'crypto';
 import { connect_db } from "../model/db.js";
+import { cacheOTP, getOTP, clearOTP } from "./redisHelper.js";
 
 const generateSecureOTP = () => crypto.randomInt(100000, 999999).toString();
 
@@ -57,12 +58,9 @@ export const sendOTPsignup = async (req, res) => {
         const { email } = req.body;
         const otp = generateSecureOTP();
         console.log(otp)
-        await OTP.findOneAndUpdate(
-            { email },
-            { otp, expiresAt: Date.now() + 5 * 60 * 1000 },
-            { upsert: true, returnDocument: 'after' }
-        );
-
+        //putting in redis
+        await cacheOTP(email, otp, 300)
+       
         await transporter.sendMail({
             from: `"Eduhub Support" <${process.env.APP_EMAIL}>`,
             to: email,
@@ -107,7 +105,6 @@ export const sendEventConfirmation = async ({
     eventName
 }) => {
     try {
-        await connect_db()
         console.log("Email received:", email);
         console.log("Email function triggered");
 

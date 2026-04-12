@@ -2,7 +2,7 @@
 //Event Controller for create event, get event, update and delete
 import mongoose from "mongoose";
 import Event from "../model/event.model.js";
-
+import { cacheEvent, getCachedEvent, invalidateCollegeEventCache } from "../utils/redisHelper.js"
 
 //create_Event
 export const Createevent = async (req, res) => {
@@ -45,6 +45,9 @@ export const Createevent = async (req, res) => {
             collegename: req.user.collegename,
             createdBy: req.user._id
         });
+
+        // Invalidate event cache when new event is created
+        await invalidateCollegeEventCache(req.user.collegename);
 
         res.status(201).json({
             success: true,
@@ -98,20 +101,41 @@ export const getevent = async (req, res) => {
         const pageLimit = parseInt(limit) || 10;
         const skip = (currentPage - 1) * pageLimit;
 
-        // Get total count and events
+        // Check Redis cache first
+        let cachedData = await getCachedEvent(req.user.collegename, filter);
+        
+        if (cachedData) {
+            return res.status(200).json({
+                success: true,
+                totalEvents: cachedData.totalEvents,
+                totalPages: cachedData.totalPages,
+                currentPage: cachedData.currentPage,
+                count: cachedData.count,
+                events: cachedData.events,
+                source: "cache"
+            });
+        }
+
+        // Cache miss - fetch from database
         const totalEvents = await Event.countDocuments(filter);
         const events = await Event.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(pageLimit);
 
-        return res.status(200).json({
-            success: true,
+        // Cache the result for 5 minutes
+        const responseData = {
             totalEvents,
             totalPages: Math.ceil(totalEvents / pageLimit),
             currentPage,
             count: events.length,
             events
+        };
+        await cacheEvent(req.user.collegename, filter, responseData, 300);
+
+        return res.status(200).json({
+            success: true,
+            ...responseData
         });
 
     } catch (error) {

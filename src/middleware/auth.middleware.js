@@ -1,7 +1,7 @@
 //Authentication middleware for login ,check and verify jwt cookies
 import jwt from "jsonwebtoken";
 import Users from "../model/user.model.js";
-import { connect_db } from "../model/db.js";
+import { cacheUserSession, getCachedUserSession } from "../utils/redisHelper.js"
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -22,35 +22,22 @@ export const authMiddleware = async (req, res, next) => {
 
         const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
         if (!accessTokenSecret) {
-            console.error("ACCESS_TOKEN_SECRET is missing in environment");
             return res.status(500).json({
                 success: false,
                 message: "Server auth configuration error"
             });
         }
 
-        const unverifiedPayload = jwt.decode(token);
-        console.log("Auth token payload:", {
-            userId: unverifiedPayload?._id,
-            exp: unverifiedPayload?.exp,
-            now: Math.floor(Date.now() / 1000)
-        });
-
         const decoded = jwt.verify(token, accessTokenSecret);
-
-        await connect_db();
-        const user = await Users.findById(decoded._id).select("-password -refreshToken");
-
-        console.log("Auth user lookup:", {
-            decodedUserId: decoded?._id,
-            userFound: Boolean(user)
-        });
+        // redis used
+        let user = await getCachedUserSession(decoded._id)
 
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized — user no longer exists"
-            });
+
+            //finding in database
+            user = await Users.findById(decoded._id)
+            //now putting in redis
+            await cacheUserSession(decoded._id, user)
         }
 
         req.user = user;

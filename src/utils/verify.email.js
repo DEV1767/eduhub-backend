@@ -1,37 +1,45 @@
 
-//verify sended email
-import OTP from "../model/emailotp.model.js"
+//verify sended email with Redis
+import { getOTP, clearOTP } from "./redisHelper.js";
+
 export const verifyOTP = async (req, res) => {
     try {
-        const { email, otp } = req.body
-        const record = await OTP.findOne({ email });
-        console.log(record)
-        if (!record) {
-            return res.status(404).json({
-                message: "No found OTP"
-            })
-        }
-
-        if (record.expiresAt < Date.now()) {
+        const { email, otp } = req.body;
+        
+        if (!email || !otp) {
             return res.status(400).json({
-                message: "OTP expired"
-            })
+                message: "Email and OTP are required"
+            });
         }
 
-        if (record.otp !== otp) {
+        // Get OTP from Redis
+        const storedOtp = await getOTP(email);
+        console.log("Stored OTP:", storedOtp);
+        
+        if (!storedOtp) {
+            return res.status(404).json({
+                message: "OTP not found or expired"
+            });
+        }
+
+        // Compare OTP (Redis automatically handles expiration)
+        if (storedOtp !== otp) {
             return res.status(400).json({
                 message: "Invalid OTP"
-            })
+            });
         }
 
-        await OTP.deleteOne({ email })
-        res.json({
-            message: "OTP verified sucessfully"
-        })
+        // Clear OTP from Redis after successful verification
+        await clearOTP(email);
+        
+        res.status(200).json({
+            success: true,
+            message: "OTP verified successfully"
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({
-            messag: "Internal server issue"
-        })
+            message: "Internal server error"
+        });
     }
-}
+};
