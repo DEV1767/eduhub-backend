@@ -32,12 +32,56 @@ export const createeventschema = joi.object({
 })
 
 export const registerevent = joi.object({
-    teamname: joi.string().min(3).required(),
-    leadname: joi.string().min(2).required(),
-    members: joi.array().items(joi.string().min(2)).min(1).max(5).required(),
-    collegeid: joi.string().required(),
-    email: joi.string().email().required(),
-    eventId: joi.string().required(),
+    teamname: joi.string()
+        .min(3)
+        .max(50)
+        .pattern(/^[a-zA-Z0-9\s\-_]+$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Team name can only contain letters, numbers, spaces, hyphens, and underscores',
+            'string.min': 'Team name must be at least 3 characters',
+            'string.max': 'Team name cannot exceed 50 characters'
+        }),
+    leadname: joi.string()
+        .min(2)
+        .max(50)
+        .pattern(/^[a-zA-Z\s]+$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Lead name can only contain letters and spaces',
+            'string.min': 'Lead name must be at least 2 characters',
+            'string.max': 'Lead name cannot exceed 50 characters'
+        }),
+    phone: joi.string()
+        .pattern(/^\d{10}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Phone must be exactly 10 digits'
+        }),
+    members: joi.array()
+        .items(joi.string().min(2))
+        .min(1)
+        .max(5)
+        .required()
+        .messages({
+            'array.min': 'At least 1 member is required',
+            'array.max': 'Maximum 5 members allowed',
+            'array.includes': 'Each member name must be at least 2 characters'
+        }),
+    collegeid: joi.string()
+        .min(6)
+        .pattern(/^[a-zA-Z0-9]+$/)
+        .required()
+        .messages({
+            'string.min': 'College ID must be at least 6 characters',
+            'string.pattern.base': 'College ID can only contain letters and numbers'
+        }),
+    eventId: joi.string()
+        .pattern(/^[0-9a-fA-F]{24}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Invalid Event ID format'
+        }),
 })
 
 export const Schedulevalidator = joi.object({

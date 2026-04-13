@@ -37,7 +37,7 @@ const Registrationschema = new mongoose.Schema({
     status: {
         type: String,
         enum: ["Pending", "Approved", "Rejected", "Confirmed"],
-        default: "Pending"
+        default: "Confirmed"
     },
     
     // Payment Fields

@@ -44,6 +44,7 @@ export const addslot = async (req, res) => {
 // ── GET SCHEDULE ──
 export const getschedule = async (req, res) => {
     try {
+        console.log("hitted")
         const { eventId } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(eventId)) {
