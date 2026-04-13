@@ -8,7 +8,7 @@ export const registeruserSchema = joi.object({
     firstname: joi.string().min(5).required(),
     lastname: joi.string(),
     email: joi.string().email().required(),
-    role: joi.string().valid("Student", "Faculty", "Organizer").default("Student"),
+    role: joi.string().valid("Student", "Faculty", "Organiser").default("Student"),
     collegename: joi.string().min(5).required(),
     password: joi.string().min(6).pattern(/[a-zA-Z0-9]/).required()
 });
@@ -48,3 +48,34 @@ export const Schedulevalidator = joi.object({
     order: joi.number().optional()
 })
 
+export const EventRules = joi.object({
+    rules: joi.string().min(3).required(),
+    rulesVisible: joi.boolean().required()
+});
+
+export const EventCoordinator = joi.object({
+    name: joi.string().min(4).required(),
+    phone: joi.string().min(10).required(), 
+    email: joi.string().email().required()
+});
+
+export const EventInfoLink = joi.object({
+    label: joi.string().min(2).required(), 
+    url: joi.string().uri().required()
+});
+
+export const EventFaqInfoSchema = joi.object({
+    q: joi.string().min(3).required(),
+    a: joi.string().min(3).required()
+});
+
+export const EventInfoSchema = joi.object({
+    description: joi.string().min(10).required(),
+    eligibility: joi.string().allow(""),
+
+    coordinator: EventCoordinator.required(), 
+
+    links: joi.array().items(EventInfoLink).default([]), 
+
+    faqs: joi.array().items(EventFaqInfoSchema).default([]) 
+});

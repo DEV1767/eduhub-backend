@@ -10,7 +10,7 @@ const Registrationschema = new mongoose.Schema({
     },
     leadname: {
         type: String,
-        required:true
+        required: true
     },
     members: {
         type: [String],
@@ -22,7 +22,9 @@ const Registrationschema = new mongoose.Schema({
     },
     email: {
         type: String,
-        
+    },
+    phone: {
+        type: String,
     },
     event: {
         type: mongoose.Schema.Types.ObjectId,
@@ -34,8 +36,50 @@ const Registrationschema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["Confirmed", "Cancelled"],
-        default: "Confirmed"
+        enum: ["Pending", "Approved", "Rejected", "Confirmed"],
+        default: "Pending"
+    },
+    
+    // Payment Fields
+    paymentStatus: {
+        type: String,
+        enum: ["Pending", "Paid", "Failed"],
+        default: "Pending"
+    },
+    paymentAmount: {
+        type: Number,
+        default: null
+    },
+    paymentMethod: {
+        type: String,
+        enum: ["UPI", "Cash", "Card", "Bank Transfer", null],
+        default: null
+    },
+    transactionId: {
+        type: String,
+        default: null
+    },
+    paymentDate: {
+        type: Date,
+        default: null
+    },
+    
+    // Approval/Rejection Fields
+    approvedAt: {
+        type: Date,
+        default: null
+    },
+    rejectionReason: {
+        type: String,
+        default: null
+    },
+    rejectionNotes: {
+        type: String,
+        default: null
+    },
+    rejectedAt: {
+        type: Date,
+        default: null
     },
 
     createdBy: {

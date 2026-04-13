@@ -2,7 +2,12 @@
 //Event Controller for create event, get event, update and delete
 import mongoose from "mongoose";
 import Event from "../model/event.model.js";
+import Teams from "../model/registraton.model.js"
 import { cacheEvent, getCachedEvent, invalidateCollegeEventCache } from "../utils/redisHelper.js"
+import { EventRules } from "../validators/joi.validate.js";
+import { cacheEventRules, cacheEventInfo } from "../utils/redisHelper.js";
+
+
 
 //create_Event
 export const Createevent = async (req, res) => {
@@ -63,7 +68,6 @@ export const Createevent = async (req, res) => {
     }
 };
 
-
 //get_all_event(Ai-help)
 export const getevent = async (req, res) => {
     try {
@@ -103,7 +107,7 @@ export const getevent = async (req, res) => {
 
         // Check Redis cache first
         let cachedData = await getCachedEvent(req.user.collegename, filter);
-        
+
         if (cachedData) {
             return res.status(200).json({
                 success: true,
@@ -230,3 +234,95 @@ export const deleteevent = async (req, res) => {
         })
     }
 }
+
+//adding rules
+export const eventRules = async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const { error, value } = EventRules.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.details[0].message
+            });
+        }
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: "Event not found"
+            });
+        }
+        if (event.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized: Only event owner can update info"
+            });
+        }
+
+        const { rules, rulesVisible } = value;
+
+        event.rules = rules;
+        event.rulesVisible = rulesVisible;
+
+        await event.save();
+
+        await cacheEventRules(event.rules, event.rulesVisible, eventId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Event rules updated successfully",
+            data: event
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+//adding info
+export const updateEventInfo = async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const infoData = req.body;
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: "Event not found"
+            });
+        }
+        if (event.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized: Only event owner can update info"
+            });
+        }
+        event.info = infoData;
+        await event.save();
+
+        await cacheEventInfo(eventId, event.info);
+
+        return res.status(200).json({
+            success: true,
+            message: "Event info updated successfully",
+            event,
+            info: event.info
+        });
+
+    } catch (error) {
+        console.error("Update Event Info Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+

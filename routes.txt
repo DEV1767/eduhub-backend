@@ -1,0 +1,271 @@
+================================================================================
+                    EVENTHUB - CURRENT BACKEND ROUTES
+                        BASE URL: http://localhost:8000/api/v1
+================================================================================
+
+TOTAL ROUTES: 27 (21 Existing + 7 OTP/Support - Now All Core Routes Implemented!)
+
+================================================================================
+                          AUTH ROUTES (/auth)
+================================================================================
+
+PUBLIC ROUTES:
+POST   /auth/signup                     - User registration (signup)
+POST   /auth/login                      - User login
+POST   /auth/refresh                    - Refresh access token
+POST   /auth/send-otp/signup            - Send OTP for signup verification
+POST   /auth/verify-otp                 - Verify OTP
+
+PROTECTED ROUTES (Auth Required):
+GET    /auth/me                         - Get current logged-in user
+POST   /auth/logout                     - Logout user (⚠️ Currently GET, should be POST)
+
+================================================================================
+                          EVENT ROUTES (/events)
+================================================================================
+
+PROTECTED - Organiser/Faculty Only:
+POST   /events                          - Create new event
+PUT    /events/:id                      - Update event details
+DELETE /events/:id                      - Delete event
+PUT    /events/:eventId/rules           - Save event rules & regulations
+PUT    /events/:eventId/info            - Save event info (description, FAQs, etc)
+
+PROTECTED - All Authenticated Users:
+GET    /events                          - Get all events (with filters)
+GET    /events/:id                      - Get single event details (⚠️ Uses :id, should be :eventId)
+
+================================================================================
+                        SCHEDULE ROUTES (/schedule)
+================================================================================
+
+PROTECTED - Organiser/Faculty Only:
+POST   /schedule/:eventId               - Add time slot to event
+PUT    /schedule/:eventId/:slotId       - Update time slot
+DELETE /schedule/:eventId/:slotId       - Delete time slot
+
+PROTECTED - All Authenticated Users:
+GET    /schedule/:eventId               - Get all time slots for event
+
+================================================================================
+                    TEAMS/REGISTRATION ROUTES (/teams)
+================================================================================
+
+PUBLIC/PROTECTED:
+POST   /teams/register                  - Register team for event
+
+PROTECTED - All Users:
+GET    /teams/registrations/mine        - Get user's own registrations
+
+PROTECTED - Organiser/Faculty Only:
+GET    /teams/registrations/:eventId    - ✅ NEW: Get all registrations for event (Frontend Endpoint)
+GET    /teams/:id/teams                 - Get all teams for event (⚠️ Uses :id, should be :eventId)
+PUT    /teams/registrations/:registrationId/approve   - ✅ FIXED: Approve registration
+PUT    /teams/registrations/:registrationId/reject    - ✅ FIXED: Reject registration
+PUT    /teams/registrations/:registrationId/payment   - ✅ NEW: Update payment status
+DELETE /teams/:tid                      - Cancel registration (⚠️ Uses :tid, should be :teamId)
+
+================================================================================
+                          USER ROUTES (/user)
+================================================================================
+
+PROTECTED - All Authenticated Users:
+GET    /user/me                         - Get user profile
+PUT    /user/updateme                   - Update user profile
+PUT    /user/updatepassword             - Change password
+
+================================================================================
+                    ✅ NEW ENDPOINTS IMPLEMENTED
+================================================================================
+
+IMPLEMENTED TODAY:
+
+1. GET /teams/registrations/:eventId
+   Purpose: Get all registrations for specific event
+   Auth: Required (Organiser/Faculty)
+   Response: {
+     success: true,
+     count: number,
+     registrations: [
+       {
+         _id, eventId, teamName, leadName, email, phone, members, collegeId,
+         status, paymentStatus, paymentAmount, paymentMethod, transactionId,
+         paymentDate, createdAt, approvedAt, rejectionReason, rejectionNotes,
+         rejectedAt
+       }
+     ]
+   }
+
+2. PUT /teams/registrations/:registrationId/payment
+   Purpose: Update payment status for registration
+   Auth: Required (Organiser/Faculty)
+   Body: { status, amount, method, transactionId, date }
+   Response: {
+     success: true,
+     message: "Payment status updated successfully",
+     registration: { payment fields }
+   }
+
+BUGS FIXED:
+
+1. Approval Logic:
+   ✅ Fixed instance reference (Teams → registration)
+   ✅ Fixed user ID check (req.user.id → req.user._id)
+   ✅ Fixed save call (Teams.save() → registration.save())
+   ✅ Changed status from "Confirmed" to "Approved"
+   ✅ Added approvedAt timestamp
+   ✅ Added authorization check with event creator
+
+2. Rejection Logic:
+   ✅ Fixed all instance references
+   ✅ Fixed save call
+   ✅ Changed status from "Cancelled" to "Rejected"
+   ✅ Added rejectionReason and rejectionNotes
+   ✅ Added rejectedAt timestamp
+   ✅ Added authorization check with event creator
+
+3. Registration Model:
+   ✅ Added phone field
+   ✅ Added paymentStatus (enum)
+   ✅ Added paymentAmount
+   ✅ Added paymentMethod (enum)
+   ✅ Added transactionId
+   ✅ Added paymentDate
+   ✅ Added approvedAt
+   ✅ Added rejectionReason
+   ✅ Added rejectionNotes
+   ✅ Added rejectedAt
+   ✅ Updated status enum: "Pending" | "Approved" | "Rejected" | "Confirmed"
+
+================================================================================
+                       ⚠️  REMAINING ISSUES
+================================================================================
+
+1. AUTH Route Naming:
+   Current:  POST /auth/signup
+   Expected: POST /auth/register
+   Status: Works but naming differs from requirements
+
+2. Logout Method:
+   Current:  GET /auth/logout
+   Expected: POST /auth/logout
+   Status: RESTful non-compliance
+
+3. Route Parameter Inconsistency:
+   - /events/:id              should be /events/:eventId
+   - /teams/:id/teams         should be /teams/:eventId/teams
+   - /teams/:tid              should be /teams/:teamId
+   Status: Works but inconsistent naming
+
+================================================================================
+                      ROUTES BY USE CASE
+================================================================================
+
+AUTHENTICATION FLOW:
+  1. POST /auth/signup              → Register new user
+  2. POST /auth/send-otp/signup     → Send OTP verification
+  3. POST /auth/verify-otp          → Verify OTP
+  4. POST /auth/login               → Login user
+  5. GET  /auth/me                  → Get current user
+  6. POST /auth/logout              → Logout user
+
+EVENT MANAGEMENT:
+  1. POST   /events                 → Create event
+  2. GET    /events                 → List all events
+  3. GET    /events/:id             → Get event details
+  4. PUT    /events/:id             → Update event
+  5. DELETE /events/:id             → Delete event
+  6. PUT    /events/:eventId/rules  → Add rules
+  7. PUT    /events/:eventId/info   → Add event info
+
+SCHEDULE MANAGEMENT:
+  1. POST   /schedule/:eventId                → Add slot
+  2. GET    /schedule/:eventId                → Get all slots
+  3. PUT    /schedule/:eventId/:slotId        → Update slot
+  4. DELETE /schedule/:eventId/:slotId        → Delete slot
+
+TEAM REGISTRATION & MANAGEMENT:
+  1. POST   /teams/register                              → Register team
+  2. GET    /teams/registrations/:eventId                → ✅ Get all registrations
+  3. GET    /teams/registrations/mine                    → Get user's registrations
+  4. PUT    /teams/registrations/:registrationId/approve → ✅ Approve registration
+  5. PUT    /teams/registrations/:registrationId/reject  → ✅ Reject registration
+  6. PUT    /teams/registrations/:registrationId/payment → ✅ Update payment
+  7. DELETE /teams/:tid                                  → Cancel registration
+
+USER PROFILE:
+  1. GET    /user/me                          → Get profile
+  2. PUT    /user/updateme                    → Update profile
+  3. PUT    /user/updatepassword              → Change password
+
+================================================================================
+                         ROLES & PERMISSIONS
+================================================================================
+
+Public Routes (No Auth):
+  - POST /auth/signup
+  - POST /auth/login
+  - POST /auth/send-otp/signup
+  - POST /auth/verify-otp
+
+Organiser/Faculty Only:
+  - POST /events
+  - PUT /events/:id
+  - DELETE /events/:id
+  - PUT /events/:eventId/rules
+  - PUT /events/:eventId/info
+  - POST /schedule/:eventId
+  - PUT /schedule/:eventId/:slotId
+  - DELETE /schedule/:eventId/:slotId
+  - GET /teams/registrations/:eventId
+  - PUT /teams/registrations/:registrationId/approve
+  - PUT /teams/registrations/:registrationId/reject
+  - PUT /teams/registrations/:registrationId/payment
+  - DELETE /teams/:tid
+
+All Authenticated Users:
+  - GET /auth/me
+  - POST /auth/logout
+  - GET /events
+  - GET /events/:id
+  - GET /schedule/:eventId
+  - POST /teams/register
+  - GET /teams/registrations/mine
+  - GET /user/me
+  - PUT /user/updateme
+  - PUT /user/updatepassword
+
+================================================================================
+                         AUTHENTICATION
+================================================================================
+
+All protected routes require:
+  Header: Authorization: Bearer <token>
+  OR Cookies: Send with credentials: 'include'
+
+User roles available from /auth/me:
+  - "Organiser"
+  - "Faculty"
+  - "Student"
+  - "Admin"
+
+================================================================================
+                        TESTING URLS
+================================================================================
+
+Register Team:
+POST http://localhost:8000/api/v1/teams/register
+
+Get All Registrations for Event:
+GET http://localhost:8000/api/v1/teams/registrations/[eventId]
+
+Approve Registration:
+PUT http://localhost:8000/api/v1/teams/registrations/[registrationId]/approve
+
+Reject Registration:
+PUT http://localhost:8000/api/v1/teams/registrations/[registrationId]/reject
+Body: { reason: "...", notes: "..." }
+
+Update Payment:
+PUT http://localhost:8000/api/v1/teams/registrations/[registrationId]/payment
+Body: { status: "Paid", amount: 200, method: "UPI", transactionId: "TXN123", date: "2025-04-13" }

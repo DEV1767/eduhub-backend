@@ -1,4 +1,6 @@
 
+
+import { concat } from "ethers";
 import redisClient from "../config/redis.js"
 
 
@@ -11,7 +13,6 @@ export const cacheUserSession = async (userId, userData) => {
         console.error("Redis cacheUsersession error :", error.message);
     }
 }
-
 
 export const getCachedUserSession = async (userId) => {
     try {
@@ -51,7 +52,6 @@ export const clearOTP = async (email) => {
         console.error("Redis clearOTP error:", error.message)
     }
 }
-
 
 export const cacheEvent = async (collegename, filters, data, ttl = 300) => {
     try {
@@ -115,5 +115,40 @@ export const invalidateScheduleCache = async (eventId) => {
         await redisClient.del(key);
     } catch (error) {
         console.error("Redis invalidateScheduleCache error:", error.message);
+    }
+};
+
+export const cacheEventRules = async (rules, rulesVisible, eventId) => {
+    try {
+        const key = `event:${eventId}:rules`;
+
+        await redisClient.set(
+            key,
+            JSON.stringify({
+                rules,
+                rulesVisible
+            }),
+            "EX",
+            60 * 60
+        );
+
+    } catch (err) {
+        console.error("Redis Cache Error:", err);
+    }
+};
+
+export const cacheEventInfo = async (eventId, info) => {
+    try {
+        const key = `event:${eventId}:info`;
+
+        await redisClient.set(
+            key,
+            JSON.stringify(info),
+            "EX",
+            60 * 60 
+        );
+
+    } catch (error) {
+        console.error("Redis cache error:", error);
     }
 };

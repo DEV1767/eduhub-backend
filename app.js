@@ -8,10 +8,9 @@ import eventRoutes from "./src/routes/event.route.js";
 import teamRoutes from "./src/routes/teams.routes.js"
 import scheduleRoutes from "./src/routes/schedule.route.js"
 import userRoutes from "./src/routes/user.routes.js"
+import { requestLogger } from "./src/middleware/logger.middleware.js";
 
 const app = express()
-
-
 
 
 //middlewares
@@ -24,6 +23,9 @@ app.use(
         credentials: true
     })
 );
+
+// Request logging middleware (MUST be after basic middlewares)
+app.use(requestLogger);
 
 app.get("/test", (req, res) => {
     res.send("Hii !! welcome to event managing website and server is started");

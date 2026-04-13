@@ -7,3 +7,9 @@
     "role":"Student",
     "collegename":"JNNCE"
 }
+
+//organiser
+{
+    "email":"p622133@gmail.com",
+    "password":"p622133@gmail.com"
+}
