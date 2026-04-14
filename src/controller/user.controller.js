@@ -1,6 +1,7 @@
 //User controller for updating password and own profile
 import User from "../model/user.model.js"
 
+
 export const getuser = async (req, res) => {
     try {
         return res.status(200).json({

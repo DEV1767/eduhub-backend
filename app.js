@@ -9,6 +9,7 @@ import teamRoutes from "./src/routes/teams.routes.js"
 import scheduleRoutes from "./src/routes/schedule.route.js"
 import userRoutes from "./src/routes/user.routes.js"
 import { requestLogger } from "./src/middleware/logger.middleware.js";
+import { responseFormatterMiddleware } from "./src/middleware/responseFormatter.middleware.js";
 
 const app = express()
 
@@ -26,6 +27,9 @@ app.use(
 
 // Request logging middleware (MUST be after basic middlewares)
 app.use(requestLogger);
+
+// Response formatter middleware - sanitizes all responses
+app.use(responseFormatterMiddleware);
 
 app.get("/test", (req, res) => {
     res.send("Hii !! welcome to event managing website and server is started");

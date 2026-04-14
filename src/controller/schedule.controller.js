@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Schedule from "../model/schedule.model.js";
 import Event from "../model/event.model.js";
 
+
 // ── ADD SLOT ──
 export const addslot = async (req, res) => {
     try {

@@ -1,10 +1,10 @@
-
 //student  event (Teams detail) registration controller 
 import mongoose from "mongoose";
 import Teams from "../model/registraton.model.js";
 import Event from "../model/event.model.js";
 import { sendEventConfirmation } from "../utils/sendemail.js";
 import { registerevent } from "../validators/joi.validate.js";
+
 import {
     cacheEventData,
     getCachedEventData,
@@ -173,17 +173,7 @@ export const registerteam = async (req, res) => {
             success: true,
             message: "Team registered successfully",
             teamId: register._id,
-            registration: {
-                _id: register._id,
-                teamname: register.teamname,
-                leadname: register.leadname,
-                email: register.email,
-                status: register.status,
-                paymentStatus: register.paymentStatus,
-                eventId: register.event,
-                registeredBy: register.registeredBy,
-                createdAt: register.createdAt
-            }
+            registration: register
         });
 
     } catch (error) {
@@ -518,33 +508,10 @@ export const getRegistrationsByEvent = async (req, res) => {
         // Fetch all registrations for the event
         const registrations = await Teams.find({ event: eventId }).sort({ createdAt: -1 });
 
-        // Format response with proper camelCase field names
-        const formattedRegistrations = registrations.map(reg => ({
-            _id: reg._id,
-            eventId: reg.event,
-            teamName: reg.teamname,
-            leadName: reg.leadname,
-            email: reg.email,
-            phone: reg.phone || null,
-            members: reg.members,
-            collegeId: reg.collegeid,
-            status: reg.status,
-            paymentStatus: reg.paymentStatus,
-            paymentAmount: reg.paymentAmount,
-            paymentMethod: reg.paymentMethod,
-            transactionId: reg.transactionId,
-            paymentDate: reg.paymentDate,
-            createdAt: reg.createdAt,
-            approvedAt: reg.approvedAt,
-            rejectionReason: reg.rejectionReason,
-            rejectionNotes: reg.rejectionNotes,
-            rejectedAt: reg.rejectedAt
-        }));
-
         return res.status(200).json({
             success: true,
-            count: formattedRegistrations.length,
-            registrations: formattedRegistrations
+            count: registrations.length,
+            registrations
         });
 
     } catch (error) {
@@ -609,14 +576,7 @@ export const updatePaymentStatus = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Payment status updated successfully",
-            registration: {
-                _id: registration._id,
-                paymentStatus: registration.paymentStatus,
-                paymentAmount: registration.paymentAmount,
-                paymentMethod: registration.paymentMethod,
-                transactionId: registration.transactionId,
-                paymentDate: registration.paymentDate
-            }
+            registration
         });
 
     } catch (error) {

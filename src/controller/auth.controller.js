@@ -7,6 +7,7 @@ import { registeruserSchema, loginuserSchema } from "../validators/joi.validate.
 import { validate } from "../middleware/validate.js"
 
 
+
 // REGISTER  
 export const registerUser = async (req, res) => {
     try {
@@ -60,7 +61,7 @@ export const registerUser = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Registration failed",
-            error: error.message
+            ...(process.env.NODE_ENV === 'development' && { error: error.message })
         });
     }
 };
@@ -115,7 +116,7 @@ export const loginUser = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Login failed",
-            error: error.message
+            ...(process.env.NODE_ENV === 'development' && { error: error.message })
         });
     }
 };
