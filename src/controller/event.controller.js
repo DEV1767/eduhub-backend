@@ -2,7 +2,6 @@
 //Event Controller for create event, get event, update and delete
 import mongoose from "mongoose";
 import Event from "../model/event.model.js";
-import Teams from "../model/registraton.model.js"
 import { cacheEvent, getCachedEvent, invalidateCollegeEventCache } from "../utils/redisHelper.js"
 import { EventRules } from "../validators/joi.validate.js";
 import { cacheEventRules, cacheEventInfo } from "../utils/redisHelper.js";
@@ -326,4 +325,56 @@ export const updateEventInfo = async (req, res) => {
     }
 };
 
+//get remainig date 
+export const getEventRemainingDays = async (req, res) => {
+    try {
+        const { eventid } = req.params;
 
+        if (!mongoose.Types.ObjectId.isValid(eventid)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid event ID"
+            });
+        }
+        const event = await Event.findById(eventid);
+
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: "Event not found"
+            });
+        }
+
+        const now = new Date();
+        const eventDate = new Date(event.date);
+
+        const diff = eventDate - now;
+        const daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+        let status;
+
+        if (daysRemaining > 0) {
+            status = "Upcoming";
+        } else if (daysRemaining === 0) {
+            status = "Today";
+        } else {
+            status = "Completed";
+        }
+
+        return res.status(200).json({
+            success: true,
+            eventId: event._id,
+            eventDate,
+            daysRemaining,
+            status
+        });
+
+    } catch (error) {
+        console.error("Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};

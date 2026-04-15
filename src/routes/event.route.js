@@ -3,7 +3,7 @@
 
 import express from "express"
 import { validate } from "../middleware/validate.js"
-import { Createevent, getevent, getsingleevent, updateevent, deleteevent, eventRules, updateEventInfo } from "../controller/event.controller.js"
+import { Createevent, getevent, getsingleevent, updateevent, deleteevent, eventRules, updateEventInfo, getEventRemainingDays } from "../controller/event.controller.js"
 import { createeventschema, EventInfoSchema, EventRules } from "../validators/joi.validate.js"
 import { authMiddleware } from "../middleware/auth.middleware.js"
 import { authorized } from "../middleware/role.middleware.js"
@@ -16,6 +16,7 @@ router.put("/:eventId/rules", authMiddleware, authorized('Organiser', 'Faculty')
 router.put("/:eventId/info", authMiddleware, authorized("Organiser", "Faculty"), validate(EventInfoSchema), updateEventInfo)
 router.get("/", authMiddleware, getevent)
 router.get("/:id", authMiddleware, getsingleevent)
+router.get("/:eventid", authMiddleware, getEventRemainingDays)
 router.put("/:id", authMiddleware, authorized('Organiser', 'Faculty'), updateevent)
 router.delete("/:id", authMiddleware, authorized('Organiser', 'Faculty'), deleteevent)
 

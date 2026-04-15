@@ -89,7 +89,7 @@ export const registerteam = async (req, res) => {
             await cacheEventData(_eventId, {
                 _id: event._id,
                 name: event.name,
-                status: event.status,
+                registatus: event.status,
                 maxTeams: event.maxTeams,
                 teams: event.teams
             });
@@ -147,8 +147,8 @@ export const registerteam = async (req, res) => {
             phone: _phone,
             event: _eventId,
             registeredBy: req.user._id,
-            status: "Confirmed",
-            paymentStatus: "Pending",
+            Registrationstatus: "Confirmed",
+            paymentStatus: "pending",
             paymentAmount: null,
             paymentMethod: null,
             transactionId: null
@@ -292,7 +292,7 @@ export const checkregistration = async (req, res) => {
                 success: true,
                 message: "User is registered for this event",
                 teamId: cachedReg._id,
-                paymentStatus: cachedReg.paymentStatus || 'Pending',
+                paymentStatus: cachedReg.paymentStatus || 'pending',
                 cached: true
             });
         }
@@ -311,7 +311,7 @@ export const checkregistration = async (req, res) => {
                 success: true,
                 message: "User is registered for this event",
                 teamId: registered._id,
-                paymentStatus: registered.paymentStatus || 'Pending',
+                paymentStatus: registered.paymentStatus || 'pending',
                 cached: false
             });
         }
@@ -409,14 +409,14 @@ export const Approveregistratation = async (req, res) => {
             });
         }
 
-        registration.status = "Approved"
+        registration.Registrationstatus = "Approved"
         registration.approvedAt = new Date()
         await registration.save()
         return res.status(200).json({
             success: true,
             message: "Registration approved successfully",
             registration,
-            status: "Approved",
+            Registrationstatus: "Approved",
             approvedAt: registration.approvedAt
         });
 
@@ -459,7 +459,7 @@ export const Rejectregistration = async (req, res) => {
             });
         }
 
-        registration.status = "Rejected"
+        registration.Registrationstatus = "Rejected"
         registration.rejectionReason = reason || null
         registration.rejectionNotes = notes || null
         registration.rejectedAt = new Date()
@@ -468,7 +468,7 @@ export const Rejectregistration = async (req, res) => {
             success: true,
             message: "Registration rejected successfully",
             registration,
-            status: "Rejected",
+            Registrationstatus: "Rejected",
             rejectionReason: registration.rejectionReason,
             rejectionNotes: registration.rejectionNotes,
             rejectedAt: registration.rejectedAt
@@ -512,71 +512,6 @@ export const getRegistrationsByEvent = async (req, res) => {
             success: true,
             count: registrations.length,
             registrations
-        });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
-}
-
-// UPDATE PAYMENT STATUS FOR REGISTRATION
-export const updatePaymentStatus = async (req, res) => {
-    try {
-        const { registrationId } = req.params;
-        const { status, amount, method, transactionId, date } = req.body;
-
-        // Validate registrationId
-        if (!mongoose.Types.ObjectId.isValid(registrationId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid registration ID"
-            });
-        }
-
-        // Validate payment status
-        const validStatuses = ["Pending", "Paid", "Failed"];
-        if (status && !validStatuses.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid payment status. Must be 'Pending', 'Paid', or 'Failed'"
-            });
-        }
-
-        // Find registration
-        const registration = await Teams.findById(registrationId);
-        if (!registration) {
-            return res.status(404).json({
-                success: false,
-                message: "Registration not found"
-            });
-        }
-
-        // Check authorization (only event organiser can update payment)
-        const event = await Event.findById(registration.event);
-        if (event.createdBy.toString() !== req.user._id.toString() && req.user.role !== "Admin") {
-            return res.status(403).json({
-                success: false,
-                message: "Unauthorized: Only event organiser can update payment"
-            });
-        }
-
-        // Update payment fields
-        if (status) registration.paymentStatus = status;
-        if (amount) registration.paymentAmount = amount;
-        if (method) registration.paymentMethod = method;
-        if (transactionId) registration.transactionId = transactionId;
-        if (date) registration.paymentDate = new Date(date);
-
-        await registration.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Payment status updated successfully",
-            registration
         });
 
     } catch (error) {

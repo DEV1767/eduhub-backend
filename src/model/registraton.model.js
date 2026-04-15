@@ -1,94 +1,89 @@
-
-// Team registration for events(for students)
 import mongoose from "mongoose";
 
-
 const Registrationschema = new mongoose.Schema({
-    teamname: {
-        type: String,
-        required: true,
-    },
-    leadname: {
-        type: String,
-        required: true
-    },
-    members: {
-        type: [String],
-        required: true
-    },
-    collegeid: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-    },
-    phone: {
-        type: String,
-    },
+
+    teamname: { type: String, required: true },
+    leadname: { type: String, required: true },
+    members: { type: [String], required: true },
+    collegeid: { type: String, required: true },
+    email: { type: String },
+    phone: { type: String },
+
     event: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Event"
     },
+
     registeredBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
+        ref: "User"
     },
-    status: {
+
+    Registrationstatus: {
         type: String,
         enum: ["Pending", "Approved", "Rejected", "Confirmed"],
         default: "Confirmed"
     },
-    
-    // Payment Fields
-    paymentStatus: {
+
+    // 🔥 Payment Fields
+    paymentProofUrl: {
         type: String,
-        enum: ["Pending", "Paid", "Failed"],
-        default: "Pending"
-    },
-    paymentAmount: {
-        type: Number,
         default: null
     },
+
+    paymentStatus: {
+        type: String,
+        enum: ["pending", "submitted", "approved", "rejected"],
+        default: "pending"
+    },
+
     paymentMethod: {
         type: String,
         enum: ["UPI", "Cash", "Card", "Bank Transfer", null],
         default: null
     },
+
+    paymentAmount: {
+        type: Number,
+        default: null
+    },
+
     transactionId: {
         type: String,
         default: null
     },
-    paymentDate: {
+
+    submittedAt: {
         type: Date,
         default: null
     },
-    
-    // Approval/Rejection Fields
+
     approvedAt: {
         type: Date,
         default: null
     },
-    rejectionReason: {
-        type: String,
+
+    approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         default: null
     },
-    rejectionNotes: {
-        type: String,
-        default: null
-    },
+
     rejectedAt: {
         type: Date,
         default: null
     },
 
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+    rejectionReason: {
+        type: String,
+        default: null
+    },
+
+    isPaymentVerified: {
+        type: Boolean,
+        default: false
     }
 
-}, {
-    timestamps: true
-})
+}, { timestamps: true });
 
-export default mongoose.model("Teams", Registrationschema);
+export default mongoose.model("Registration", Registrationschema);
